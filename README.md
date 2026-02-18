@@ -1,17 +1,33 @@
-# mi_app
+# Gestión Clínica (Flutter + Node.js)
 
-A new Flutter project.
+Aplicación full-stack para autenticación, gestión de usuarios y gestión de pacientes con arquitectura modular y escalable.
 
-## Getting Started
+## Frontend Flutter
+- Arquitectura feature-first por módulos:
+  - `features/auth`
+  - `features/users`
+  - `features/patients`
+- Capas por feature:
+  - `presentation` (screens/widgets)
+  - `application` (state management con Riverpod)
+  - `domain` (entidades/repositorios)
+  - `data` (modelos + integración API con Dio)
+- Enrutamiento centralizado con `go_router`.
 
-This project is a starting point for a Flutter application.
+## Backend
+El backend completo está en `BACKEND/` con Express + Prisma + PostgreSQL.
 
-A few resources to get you started if this is your first Flutter project:
+## Arranque rápido Flutter
+```bash
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Arranque backend
+```bash
+cd BACKEND
+cp .env.example .env
+npm install
+npm run prisma:generate
+npm run dev
+```

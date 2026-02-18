@@ -1,17 +1,37 @@
-# mi_app
+# Gestión Clínica (Flutter + Node.js)
 
-A new Flutter project.
+Proyecto fullstack para gestión de usuarios y pacientes con módulos habilitados por rol.
 
-## Getting Started
+## Frontend Flutter
 
-This project is a starting point for a Flutter application.
+Arquitectura **feature-first** con capas por módulo:
 
-A few resources to get you started if this is your first Flutter project:
+- `presentation` (screens/widgets)
+- `application` (state management con Riverpod)
+- `domain` (entidades y casos de uso)
+- `data` (repositorios e integración HTTP con Dio)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Tecnologías:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Riverpod para estado
+- go_router para navegación centralizada
+- Dio para consumo API
+
+### Ejecutar frontend
+
+```bash
+flutter pub get
+flutter run
+```
+
+> Puedes apuntar la API con `--dart-define=API_BASE_URL=http://localhost:3000/api`.
+
+## Backend Node.js
+
+El backend se encuentra en `BACKEND/` y expone endpoints REST para auth, usuarios y pacientes.
+
+Ver documentación detallada en [`BACKEND/README.md`](BACKEND/README.md).
+
+## Base de datos
+
+Script SQL completo disponible en `BACKEND/sql/init.sql`.

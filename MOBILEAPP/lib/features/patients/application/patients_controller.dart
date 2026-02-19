@@ -41,7 +41,8 @@ class PatientsController extends StateNotifier<PatientsState> {
   }
 }
 
-final patientsControllerProvider =
+final StateNotifierProvider<PatientsController, PatientsState>
+    patientsControllerProvider =
     StateNotifierProvider<PatientsController, PatientsState>((ref) {
-  return PatientsController(ref.read(patientsUseCasesProvider))..load();
+  return PatientsController(ref.read(patientsUseCasesProvider));
 });

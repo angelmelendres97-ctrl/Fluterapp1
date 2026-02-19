@@ -47,10 +47,10 @@ class UsersController extends StateNotifier<UsersState> {
   }
 }
 
-final usersControllerProvider =
+final StateNotifierProvider<UsersController, UsersState> usersControllerProvider =
     StateNotifierProvider<UsersController, UsersState>((ref) {
   return UsersController(
     ref.read(listUsersUseCaseProvider),
     ref.read(saveUserUseCaseProvider),
-  )..loadUsers();
+  );
 });

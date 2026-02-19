@@ -17,15 +17,17 @@ model User {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
   userRoles    UserRole[]
+  profile      Profile?
+  companies    Company[]
 
   @@map("users")
 }
 
 model Role {
-  id         Int          @id @default(autoincrement())
-  name       String       @unique
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id         Int              @id @default(autoincrement())
+  name       String           @unique
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
   deletedAt  DateTime?
   userRoles  UserRole[]
   permission RolePermission[]
@@ -34,12 +36,12 @@ model Role {
 }
 
 model Permission {
-  id         Int              @id @default(autoincrement())
-  code       String           @unique
+  id          Int              @id @default(autoincrement())
+  code        String           @unique
   description String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
-  roleLinks  RolePermission[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roleLinks   RolePermission[]
 
   @@map("permissions")
 }
@@ -67,18 +69,190 @@ model RolePermission {
   @@map("role_permission")
 }
 
-model Patient {
-  id         Int       @id @default(autoincrement())
-  firstName  String
-  lastName   String
-  document   String    @unique
-  phone      String?
-  email      String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
+model Province {
+  id          Int       @id @default(autoincrement())
+  countryCode String    @default("EC") @map("country_code") @db.VarChar(2)
+  name        String
+  code        String?
+  active      Boolean   @default(true)
+  createdAt   DateTime? @default(now()) @map("created_at")
+  cities      City[]
+  profiles    Profile[]
+  companies   Company[]
 
-  @@index([lastName])
-  @@index([document])
+  @@unique([countryCode, name], map: "provinces_country_name_uq")
+  @@map("provinces")
+}
+
+model City {
+  id         Int       @id @default(autoincrement())
+  provinceId Int       @map("province_id")
+  name       String
+  code       String?
+  active     Boolean   @default(true)
+  createdAt  DateTime? @default(now()) @map("created_at")
+  province   Province  @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+  profiles   Profile[]
+  companies  Company[]
+
+  @@index([provinceId], map: "cities_province_id_idx")
+  @@unique([provinceId, name], map: "cities_province_name_uq")
+  @@map("cities")
+}
+
+model ProfileType {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  name        String
+  description String?
+  active      Boolean   @default(true)
+  profiles    Profile[]
+
+  @@map("profile_types")
+}
+
+model CompanyType {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  name        String
+  description String?
+  active      Boolean   @default(true)
+  companies   Company[]
+
+  @@map("company_types")
+}
+
+model AppointmentType {
+  id           Int           @id @default(autoincrement())
+  code         String        @unique
+  name         String
+  description  String?
+  active       Boolean       @default(true)
+  appointments Appointment[]
+
+  @@map("appointment_types")
+}
+
+model ProductCategory {
+  id          Int               @id @default(autoincrement())
+  parentId    Int?              @map("parent_id")
+  code        String?           @unique
+  name        String
+  description String?
+  active      Boolean           @default(true)
+  parent      ProductCategory?  @relation("ProductCategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children    ProductCategory[] @relation("ProductCategoryTree")
+  products    Product[]
+
+  @@index([parentId], map: "product_categories_parent_id_idx")
+  @@map("product_categories")
+}
+
+model Profile {
+  id            Int         @id @default(autoincrement())
+  userId         Int?        @unique @map("user_id")
+  profileTypeId Int         @map("profile_type_id")
+  photo         String?
+  phone         String?
+  address       String?
+  provinceId    Int?        @map("province_id")
+  cityId        Int?        @map("city_id")
+  latitude      Decimal?    @db.Decimal(10, 8)
+  longitude     Decimal?    @db.Decimal(11, 8)
+  createdAt     DateTime?   @default(now()) @map("created_at")
+  user          User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileType   ProfileType @relation(fields: [profileTypeId], references: [id], onDelete: Restrict)
+  province      Province?   @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+  city          City?       @relation(fields: [cityId], references: [id], onDelete: Restrict)
+
+  @@index([profileTypeId], map: "profiles_profile_type_id_idx")
+  @@index([provinceId], map: "profiles_province_id_idx")
+  @@index([cityId], map: "profiles_city_id_idx")
+  @@map("profiles")
+}
+
+model Patient {
+  id           Int           @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  document     String        @unique
+  phone        String?
+  email        String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+  appointments Appointment[]
+
+  @@index([lastName], map: "patients_lastName_idx")
+  @@index([document], map: "patients_document_idx")
   @@map("patients")
+}
+
+model Company {
+  id            Int           @id @default(autoincrement())
+  userId         Int?          @map("user_id")
+  companyTypeId Int           @map("company_type_id")
+  name          String
+  description   String?
+  address       String?
+  provinceId    Int?          @map("province_id")
+  cityId        Int?          @map("city_id")
+  phone         String?
+  email         String?
+  logo          String?
+  verified      Boolean?      @default(false)
+  createdAt     DateTime?     @default(now()) @map("created_at")
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  companyType   CompanyType   @relation(fields: [companyTypeId], references: [id], onDelete: Restrict)
+  province      Province?     @relation(fields: [provinceId], references: [id], onDelete: Restrict)
+  city          City?         @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  products      Product[]
+  appointments  Appointment[]
+
+  @@index([companyTypeId], map: "companies_company_type_id_idx")
+  @@index([provinceId], map: "companies_province_id_idx")
+  @@index([cityId], map: "companies_city_id_idx")
+  @@map("companies")
+}
+
+model Product {
+  id          Int              @id @default(autoincrement())
+  companyId   Int              @map("company_id")
+  categoryId  Int?             @map("category_id")
+  name        String
+  description String?
+  price       Decimal          @default(0) @db.Decimal(10, 2)
+  stock       Int              @default(0)
+  image       String?
+  active      Boolean?         @default(true)
+  createdAt   DateTime?        @default(now()) @map("created_at")
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  category    ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([companyId], map: "products_company_id_idx")
+  @@index([categoryId], map: "products_category_id_idx")
+  @@map("products")
+}
+
+model Appointment {
+  id                Int             @id @default(autoincrement())
+  patientId         Int             @map("patient_id")
+  doctorId          Int?            @map("doctor_id")
+  companyId         Int?            @map("company_id")
+  appointmentTypeId Int             @map("appointment_type_id")
+  status            String          @default("PENDING") @db.VarChar(20)
+  scheduledAt       DateTime?       @map("scheduled_at")
+  notes             String?
+  price             Decimal?        @default(0) @db.Decimal(10, 2)
+  createdAt         DateTime?       @default(now()) @map("created_at")
+  patient           Patient         @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  company           Company?        @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  appointmentType   AppointmentType @relation(fields: [appointmentTypeId], references: [id], onDelete: Restrict)
+
+  @@index([patientId], map: "appointments_patient_id_idx")
+  @@index([companyId], map: "appointments_company_id_idx")
+  @@index([appointmentTypeId], map: "appointments_type_id_idx")
+  @@index([status], map: "appointments_status_idx")
+  @@index([scheduledAt], map: "appointments_scheduled_at_idx")
+  @@map("appointments")
 }

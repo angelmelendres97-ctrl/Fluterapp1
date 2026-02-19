@@ -95,3 +95,34 @@ ALTER TABLE "role_permission" ADD CONSTRAINT "role_permission_roleId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "role_permission" ADD CONSTRAINT "role_permission_permissionId_fkey" FOREIGN KEY ("permissionId") REFERENCES "permissions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Seed base roles
+INSERT INTO "roles" ("name", "updatedAt") VALUES
+  ('admin', NOW()),
+  ('medico', NOW()),
+  ('asistente', NOW());
+
+-- Seed permissions
+INSERT INTO "permissions" ("code", "description", "updatedAt") VALUES
+  ('users.read', 'Listar usuarios', NOW()),
+  ('users.write', 'Crear y editar usuarios', NOW()),
+  ('roles.read', 'Listar roles', NOW()),
+  ('roles.write', 'Crear y editar roles', NOW()),
+  ('patients.read', 'Listar pacientes', NOW()),
+  ('patients.write', 'Crear y editar pacientes', NOW());
+
+-- Seed role-permission mapping
+INSERT INTO "role_permission" ("roleId", "permissionId")
+SELECT r.id, p.id FROM "roles" r
+JOIN "permissions" p ON (
+  (r.name = 'admin') OR
+  (r.name = 'medico' AND p.code IN ('patients.read', 'patients.write')) OR
+  (r.name = 'asistente' AND p.code IN ('patients.read'))
+);
+
+-- Seed admin user and role
+INSERT INTO "users" ("name", "email", "passwordHash", "active", "updatedAt")
+VALUES ('Administrador AMED', 'admin@amedec.com', '$2a$10$RbbCmOqZdY4VaQUZG8QSKOCpbZ7fNPxpqKfWgOpus0MswQeCcC1I.', true, NOW());
+
+INSERT INTO "user_role" ("userId", "roleId")
+SELECT u.id, r.id FROM "users" u JOIN "roles" r ON r.name = 'admin' WHERE u.email = 'admin@amedec.com';

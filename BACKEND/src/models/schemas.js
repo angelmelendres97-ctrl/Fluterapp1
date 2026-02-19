@@ -8,8 +8,13 @@ const loginSchema = Joi.object({
 const userSchema = Joi.object({
   name: Joi.string().min(2).max(120).required(),
   email: Joi.string().email().required(),
-  role: Joi.string().valid('admin', 'medico', 'asistente').required(),
+  role: Joi.string().required(),
   active: Joi.boolean().optional(),
+});
+
+const roleSchema = Joi.object({
+  name: Joi.string().min(3).max(50).required(),
+  permissions: Joi.array().items(Joi.string()).min(1).required(),
 });
 
 const patientSchema = Joi.object({
@@ -20,4 +25,4 @@ const patientSchema = Joi.object({
   email: Joi.string().email().required(),
 });
 
-module.exports = { loginSchema, userSchema, patientSchema };
+module.exports = { loginSchema, userSchema, roleSchema, patientSchema };

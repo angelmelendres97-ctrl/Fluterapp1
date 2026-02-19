@@ -20,11 +20,22 @@ function authenticate(req, res, next) {
 
 function authorize(...roles) {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    const userRoles = req.user?.roles || [];
+    if (!req.user || !roles.some((role) => userRoles.includes(role))) {
       return res.status(403).json({ message: 'Sin permisos para este recurso' });
     }
     return next();
   };
 }
 
-module.exports = { authenticate, authorize };
+function authorizePermission(...permissions) {
+  return (req, res, next) => {
+    const currentPermissions = req.user?.permissions || [];
+    if (!permissions.some((permission) => currentPermissions.includes(permission))) {
+      return res.status(403).json({ message: 'Permiso insuficiente para este recurso' });
+    }
+    return next();
+  };
+}
+
+module.exports = { authenticate, authorize, authorizePermission };

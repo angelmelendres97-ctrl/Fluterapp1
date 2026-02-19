@@ -6,7 +6,17 @@ const env = require('../config/env');
 async function login(email, password) {
   const user = await prisma.user.findFirst({
     where: { email, deletedAt: null },
-    include: { userRoles: { include: { role: true } } },
+    include: {
+      userRoles: {
+        include: {
+          role: {
+            include: {
+              permission: { include: { permission: true } },
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
@@ -15,8 +25,10 @@ async function login(email, password) {
     throw err;
   }
 
-  const role = user.userRoles[0]?.role?.name || 'asistente';
-  const payload = { userId: user.id, role };
+  const roles = user.userRoles.map((userRole) => userRole.role.name);
+  const permissions = [...new Set(user.userRoles.flatMap((userRole) => userRole.role.permission.map((link) => link.permission.code)))];
+
+  const payload = { userId: user.id, roles, permissions };
 
   const accessToken = jwt.sign(payload, env.jwtAccessSecret, {
     expiresIn: env.accessTokenExpiresIn,
@@ -32,7 +44,8 @@ async function login(email, password) {
       id: user.id,
       name: user.name,
       email: user.email,
-      role,
+      roles,
+      permissions,
     },
   };
 }
@@ -41,7 +54,7 @@ function refresh(refreshToken) {
   try {
     const decoded = jwt.verify(refreshToken, env.jwtRefreshSecret);
     return jwt.sign(
-      { userId: decoded.userId, role: decoded.role },
+      { userId: decoded.userId, roles: decoded.roles, permissions: decoded.permissions },
       env.jwtAccessSecret,
       { expiresIn: env.accessTokenExpiresIn },
     );

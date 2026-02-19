@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { SectionTitle } from '../common/SectionTitle';
 import { MaterialButton } from '../common/MaterialButton';
 
-const permissionCatalog = ['users.read', 'users.write', 'roles.read', 'roles.write', 'patients.read', 'patients.write'];
+const permissionCatalog = ['users.read', 'users.write', 'roles.read', 'roles.write', 'patients.read', 'patients.write', 'appointments.read', 'appointments.write', 'catalogs.read', 'catalogs.write'];
 
 export function RolesModule({ roles, canWrite, onCreate, onUpdate }) {
   const [name, setName] = useState('');

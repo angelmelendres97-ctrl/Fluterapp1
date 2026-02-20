@@ -63,5 +63,22 @@ INSERT INTO roles (name) VALUES ('admin'), ('medico'), ('asistente');
 INSERT INTO permissions (code, description) VALUES
   ('users.read', 'Listar usuarios'),
   ('users.write', 'Crear y editar usuarios'),
+  ('roles.read', 'Listar roles'),
+  ('roles.write', 'Crear y editar roles'),
   ('patients.read', 'Listar pacientes'),
   ('patients.write', 'Crear y editar pacientes');
+
+INSERT INTO role_permission (role_id, permission_id)
+SELECT r.id, p.id FROM roles r
+JOIN permissions p ON (
+  (r.name = 'admin') OR
+  (r.name = 'medico' AND p.code IN ('patients.read', 'patients.write')) OR
+  (r.name = 'asistente' AND p.code = 'patients.read')
+);
+
+INSERT INTO users (name, email, password_hash) VALUES
+  ('Administrador AMED', 'admin@amedec.com', '$2a$10$RbbCmOqZdY4VaQUZG8QSKOCpbZ7fNPxpqKfWgOpus0MswQeCcC1I.');
+
+INSERT INTO user_role (user_id, role_id)
+SELECT u.id, r.id FROM users u, roles r
+WHERE u.email = 'admin@amedec.com' AND r.name = 'admin';

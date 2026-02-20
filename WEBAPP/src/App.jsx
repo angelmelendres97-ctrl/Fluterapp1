@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { useHashRoute } from './hooks/useHashRoute';
+import { ROUTES } from './utils/constants';
+import { LandingPage } from './pages/landing/LandingPage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { AdminShell } from './pages/admin/AdminShell';
+import { useAuth } from './hooks/useAuth';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { path, navigate } = useHashRoute();
+  const auth = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  const handleLogin = async ({ email, password }) => {
+    try {
+      setLoading(true);
+      setError('');
+      await auth.login(email, password);
+      navigate(ROUTES.adminDashboard);
+    } catch (loginError) {
+      setError(loginError.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!auth.isAuthenticated && path.startsWith('/admin')) {
+    navigate(ROUTES.login);
+    return null;
+  }
+
+  if (path === ROUTES.landing) {
+    return <LandingPage navigateToLogin={() => navigate(ROUTES.login)} />;
+  }
+
+  if (path === ROUTES.login) {
+    return (
+      <LoginPage
+        onBack={() => navigate(ROUTES.landing)}
+        onSubmit={handleLogin}
+        loading={loading}
+        error={error}
+      />
+    );
+  }
+
+  if (path.startsWith('/admin')) {
+    return <AdminShell path={path} navigate={navigate} auth={auth} />;
+  }
+
+  navigate(ROUTES.landing);
+  return null;
 }
 
-export default App
+export default App;

@@ -1,16 +1,73 @@
-# React + Vite
+# AMED EC WebApp
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend Web para **Asistencia Médica Ecuador (AMED EC)** con:
 
-Currently, two official plugins are available:
+- Landing Page institucional.
+- Sistema Administrativo responsivo.
+- Login con JWT.
+- Control de permisos por módulo.
+- Arquitectura organizada por `hooks`, `context`, `components`, `pages` y `services`.
+- Integración visual con utilidades Tailwind (vía CDN) y estilo Material UI-like para componentes base.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Estructura
 
-## React Compiler
+```txt
+src/
+  components/
+    admin/
+    auth/
+    common/
+    landing/
+    layout/
+  context/
+  hooks/
+  pages/
+    admin/
+    auth/
+    landing/
+  services/
+  utils/
+```
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+## Ejecución
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Variables de entorno
+
+Crear `.env` opcional:
+
+```bash
+VITE_API_URL=http://localhost:3000/api
+```
+
+## Rutas
+
+- `#/` Landing Page
+- `#/login` Login administrativo
+- `#/admin` Dashboard
+- `#/admin/users` Gestión de usuarios
+- `#/admin/roles` Gestión de roles
+
+## Módulos iniciales
+
+### 1) Gestión de usuarios
+
+- Listado de usuarios.
+- Creación/edición de usuario con rol y estado.
+- Restringido por permisos `users.read` y `users.write`.
+
+### 2) Gestión de roles
+
+- Listado de roles.
+- Creación de roles con permisos.
+- Restringido por permisos `roles.read` y `roles.write`.
+
+## Notas de escalabilidad
+
+- Toda la comunicación HTTP centralizada en `services/httpClient.js`.
+- Seguridad desacoplada en `AuthContext` + hooks (`useAuth`, `usePermission`).
+- El shell administrativo concentra layout, navegación y guardas de acceso.

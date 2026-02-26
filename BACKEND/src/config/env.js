@@ -1,0 +1,13 @@
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+module.exports = {
+  nodeEnv: process.env.NODE_ENV || 'development',
+  port: process.env.PORT || 3000,
+  databaseUrl: process.env.DATABASE_URL,
+  jwtAccessSecret: process.env.JWT_ACCESS_SECRET || 'access_secret',
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'refresh_secret',
+  accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
+  refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+};
